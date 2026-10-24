@@ -1,0 +1,12 @@
+import { rm, mkdir, cp, readFile, stat } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const out=path.join(root,'dist');
+await rm(out,{recursive:true,force:true});
+await mkdir(out,{recursive:true});
+for (const item of ['index.html','src','assets']) await cp(path.join(root,item),path.join(out,item),{recursive:true});
+const html=await readFile(path.join(out,'index.html'),'utf8');
+if(!html.includes('./src/main.js'))throw new Error('Build validation failed: no entry script');
+console.log(`✓ Fabric Chess Arena built to ${out}`);
+console.log(`✓ ${(await stat(path.join(out,'src/chess.js'))).size.toLocaleString()} byte chess rules engine included`);
